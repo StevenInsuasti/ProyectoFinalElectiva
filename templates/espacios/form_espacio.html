@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ titulo }} — ReservaEspacios{% endblock %}
+
+{% block nav_extra %}
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'espacios:lista_espacios' %}">
+        <i class="bi bi-door-open me-1"></i>Espacios
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'espacios:lista_espacios' %}">Espacios</a></li>
+        {% if espacio %}
+        <li class="breadcrumb-item">
+            <a href="{% url 'espacios:detalle_espacio' espacio.pk %}">{{ espacio.nombre }}</a>
+        </li>
+        {% endif %}
+        <li class="breadcrumb-item active">{{ titulo }}</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3 pb-0">
+                <h4 class="fw-bold mb-0">
+                    <i class="bi bi-door-open me-2 text-primary"></i>{{ titulo }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-12 col-md-8">
+                            <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
+                            {% render_field form.nombre %}
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">{{ form.nombre.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold">Tipo <span class="text-danger">*</span></label>
+                            {% render_field form.tipo %}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold">Capacidad <span class="text-danger">*</span></label>
+                            {% render_field form.capacidad %}
+                            {% if form.capacidad.errors %}
+                                <div class="invalid-feedback d-block">{{ form.capacidad.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12 col-md-8">
+                            <label class="form-label fw-semibold">Ubicación <span class="text-danger">*</span></label>
+                            {% render_field form.ubicacion %}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold">Estado</label>
+                            {% render_field form.estado %}
+                        </div>
+                        <div class="col-12 col-md-8">
+                            <label class="form-label fw-semibold">Descripción</label>
+                            {% render_field form.descripcion %}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Equipamiento</label>
+                            {% render_field form.equipamiento %}
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <div class="d-flex gap-2 justify-content-end">
+                        {% if espacio %}
+                        <a href="{% url 'espacios:detalle_espacio' espacio.pk %}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                        {% else %}
+                        <a href="{% url 'espacios:lista_espacios' %}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>{{ accion }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

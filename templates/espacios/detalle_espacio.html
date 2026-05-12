@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ espacio.nombre }} — ReservaEspacios{% endblock %}
+
+{% block nav_extra %}
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'espacios:lista_espacios' %}">
+        <i class="bi bi-door-open me-1"></i>Espacios
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'espacios:lista_espacios' %}">Espacios</a></li>
+        <li class="breadcrumb-item active">{{ espacio.nombre }}</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <!-- Info del espacio -->
+    <div class="col-12 col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-start">
+                <h4 class="fw-bold mb-0">{{ espacio.nombre }}</h4>
+                {% if espacio.estado == 'disponible' %}
+                    <span class="badge bg-success">Disponible</span>
+                {% elif espacio.estado == 'mantenimiento' %}
+                    <span class="badge bg-warning text-dark">Mantenimiento</span>
+                {% else %}
+                    <span class="badge bg-danger">Inactivo</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-5 text-muted small">Tipo</dt>
+                    <dd class="col-7">{{ espacio.get_tipo_display }}</dd>
+
+                    <dt class="col-5 text-muted small">Capacidad</dt>
+                    <dd class="col-7">{{ espacio.capacidad }} personas</dd>
+
+                    <dt class="col-5 text-muted small">Ubicación</dt>
+                    <dd class="col-7">{{ espacio.ubicacion }}</dd>
+
+                    {% if espacio.descripcion %}
+                    <dt class="col-5 text-muted small">Descripción</dt>
+                    <dd class="col-7">{{ espacio.descripcion }}</dd>
+                    {% endif %}
+
+                    {% if espacio.equipamiento %}
+                    <dt class="col-5 text-muted small">Equipamiento</dt>
+                    <dd class="col-7">{{ espacio.equipamiento }}</dd>
+                    {% endif %}
+
+                    <dt class="col-5 text-muted small">Creado</dt>
+                    <dd class="col-7">{{ espacio.fecha_creacion|date:"d/m/Y" }}</dd>
+                </dl>
+            </div>
+            {% if user.es_administrador %}
+            <div class="card-footer bg-white border-0 d-flex gap-2">
+                <a href="{% url 'espacios:editar_espacio' espacio.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pencil me-1"></i>Editar
+                </a>
+                <button type="button" class="btn btn-outline-danger btn-sm"
+                        data-bs-toggle="modal" data-bs-target="#modalEliminarEspacio">
+                    <i class="bi bi-trash me-1"></i>Eliminar
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Horarios del espacio -->
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+                <h5 class="fw-semibold mb-0">
+                    <i class="bi bi-clock me-2 text-primary"></i>Horarios Disponibles
+                </h5>
+                {% if user.es_administrador %}
+                <a href="{% url 'espacios:crear_horario_espacio' espacio.pk %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>Agregar Horario
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Día</th>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                                <th>Duración</th>
+                                <th>Estado</th>
+                                {% if user.es_administrador %}
+                                <th class="pe-3 text-end">Acciones</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% regroup horarios by get_dia_semana_display as horarios_por_dia %}
+                            {% for dia_group in horarios_por_dia %}
+                                {% for horario in dia_group.list %}
+                                <tr>
+                                    {% if forloop.first %}
+                                    <td class="ps-3 fw-semibold" rowspan="{{ dia_group.list|length }}">
+                                        {{ dia_group.grouper }}
+                                    </td>
+                                    {% endif %}
+                                    <td>{{ horario.hora_inicio|time:"H:i" }}</td>
+                                    <td>{{ horario.hora_fin|time:"H:i" }}</td>
+                                    <td class="text-muted small">{{ horario.duracion_minutos }} min</td>
+                                    <td>
+                                        {% if horario.activo %}
+                                            <span class="badge bg-success-subtle text-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-subtle text-secondary">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    {% if user.es_administrador %}
+                                    <td class="pe-3 text-end">
+                                        <a href="{% url 'espacios:editar_horario' horario.pk %}"
+                                           class="btn btn-sm btn-outline-secondary me-1" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarHorario"
+                                                data-url="{% url 'espacios:eliminar_horario' horario.pk %}"
+                                                data-nombre="{{ horario }}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-calendar-x d-block fs-3 mb-2"></i>
+                                    No hay horarios registrados para este espacio.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modales de confirmación -->
+{% if user.es_administrador %}
+<!-- Modal eliminar espacio -->
+<div class="modal fade" id="modalEliminarEspacio" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Eliminar Espacio
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                ¿Eliminar el espacio <strong>{{ espacio.nombre }}</strong>?
+                <p class="text-muted small mt-2 mb-0">Se eliminarán también todos sus horarios ({{ horarios|length }}).</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" action="{% url 'espacios:eliminar_espacio' espacio.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal eliminar horario -->
+<div class="modal fade" id="modalEliminarHorario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Eliminar Horario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                ¿Eliminar el horario <strong id="nombreHorario"></strong>?
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formEliminarHorario" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const modalHorario = document.getElementById('modalEliminarHorario');
+    if (modalHorario) {
+        modalHorario.addEventListener('show.bs.modal', function (e) {
+            const btn = e.relatedTarget;
+            document.getElementById('nombreHorario').textContent = btn.dataset.nombre;
+            document.getElementById('formEliminarHorario').action = btn.dataset.url;
+        });
+    }
+</script>
+{% endblock %}
