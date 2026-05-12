@@ -1,3 +1,1 @@
-# ProyectoFinalElectiva
-
-Proyecto Final Electiva
+# Sistema de Reservas de Espacios
