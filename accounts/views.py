@@ -142,6 +142,17 @@ def dashboard_view(request):
             context['total_espacios'] = None
             context['espacios_disponibles'] = None
 
+        # Estadísticas de reservas (Integrante 3)
+        try:
+            from reservas.models import Reserva
+            context['total_reservas'] = Reserva.objects.count()
+            context['reservas_pendientes'] = Reserva.objects.filter(
+                estado=Reserva.ESTADO_PENDIENTE
+            ).count()
+        except Exception:
+            context['total_reservas'] = None
+            context['reservas_pendientes'] = None
+
     return render(request, 'accounts/dashboard.html', context)
 
 
