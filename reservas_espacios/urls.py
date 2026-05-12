@@ -18,6 +18,9 @@ urlpatterns = [
     # Módulo de Gestión de Espacios y Horarios (Integrante 2)
     path('espacios/', include('espacios.urls', namespace='espacios')),
 
+    # Módulo de Reservas (Integrante 3)
+    path('reservas/', include('reservas.urls', namespace='reservas')),
+
     # Redirección raíz al login
     path('', lambda request: redirect('accounts:login'), name='home'),
 ]
