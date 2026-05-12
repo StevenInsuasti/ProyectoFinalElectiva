@@ -15,6 +15,9 @@ urlpatterns = [
     # Módulo de autenticación y usuarios (Integrante 1)
     path('accounts/', include('accounts.urls', namespace='accounts')),
 
+    # Módulo de Gestión de Espacios y Horarios (Integrante 2)
+    path('espacios/', include('espacios.urls', namespace='espacios')),
+
     # Redirección raíz al login
     path('', lambda request: redirect('accounts:login'), name='home'),
 ]

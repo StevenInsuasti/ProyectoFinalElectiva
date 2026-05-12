@@ -71,17 +71,21 @@
         </div>
     </div>
 
-    <!-- Tarjeta: Espacios (placeholder para Integrante 2) -->
+    <!-- Tarjeta: Espacios (Integrante 2) -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm h-100 border-dashed">
+        <div class="card border-0 shadow-sm h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="bg-info bg-opacity-10 rounded-3 p-3">
                     <i class="bi bi-door-open-fill text-info fs-3"></i>
                 </div>
                 <div>
                     <p class="text-muted small mb-0">Espacios</p>
-                    <h3 class="fw-bold mb-0 text-muted">—</h3>
-                    <small class="text-muted">Módulo pendiente</small>
+                    {% if total_espacios is not None %}
+                        <h3 class="fw-bold mb-0">{{ total_espacios }}</h3>
+                        <small class="text-success">{{ espacios_disponibles }} disponibles</small>
+                    {% else %}
+                        <h3 class="fw-bold mb-0 text-muted">—</h3>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -235,12 +239,14 @@
                             <small class="text-muted">Próximamente</small>
                         </div>
                     </div>
+                    <!-- Módulo de espacios (Integrante 2) -->
                     <div class="col-6">
-                        <div class="card border bg-light text-center p-3 h-100">
-                            <i class="bi bi-door-open fs-2 text-success mb-2"></i>
-                            <p class="small fw-semibold mb-0">Espacios</p>
-                            <small class="text-muted">Próximamente</small>
-                        </div>
+                        <a href="{% url 'espacios:lista_espacios' %}" class="text-decoration-none">
+                            <div class="card border text-center p-3 h-100">
+                                <i class="bi bi-door-open fs-2 text-success mb-2"></i>
+                                <p class="small fw-semibold mb-0 text-dark">Espacios</p>
+                            </div>
+                        </a>
                     </div>
                     <div class="col-6">
                         <a href="{% url 'accounts:perfil' %}" class="text-decoration-none">

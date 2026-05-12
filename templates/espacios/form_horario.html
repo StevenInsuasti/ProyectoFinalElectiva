@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ titulo }} — ReservaEspacios{% endblock %}
+
+{% block nav_extra %}
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'espacios:lista_espacios' %}">
+        <i class="bi bi-door-open me-1"></i>Espacios
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'espacios:lista_espacios' %}">Espacios</a></li>
+        {% if espacio %}
+        <li class="breadcrumb-item">
+            <a href="{% url 'espacios:detalle_espacio' espacio.pk %}">{{ espacio.nombre }}</a>
+        </li>
+        {% endif %}
+        <li class="breadcrumb-item active">{{ titulo }}</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3 pb-0">
+                <h4 class="fw-bold mb-0">
+                    <i class="bi bi-clock me-2 text-primary"></i>{{ titulo }}
+                </h4>
+                {% if espacio %}
+                <p class="text-muted small mb-0">Espacio: <strong>{{ espacio.nombre }}</strong></p>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        {% if not espacio %}
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Espacio <span class="text-danger">*</span></label>
+                            {% render_field form.espacio %}
+                        </div>
+                        {% endif %}
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Día de la semana <span class="text-danger">*</span></label>
+                            {% render_field form.dia_semana %}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Hora de inicio <span class="text-danger">*</span></label>
+                            {% render_field form.hora_inicio %}
+                            {% if form.hora_inicio.errors %}
+                                <div class="invalid-feedback d-block">{{ form.hora_inicio.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Hora de fin <span class="text-danger">*</span></label>
+                            {% render_field form.hora_fin %}
+                            {% if form.hora_fin.errors %}
+                                <div class="invalid-feedback d-block">{{ form.hora_fin.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                {% render_field form.activo %}
+                                <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                    Horario activo
+                                </label>
+                            </div>
+                        </div>
+                        {% if form.non_field_errors %}
+                        <div class="col-12">
+                            <div class="alert alert-danger py-2">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0 small">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <hr class="my-4">
+                    <div class="d-flex gap-2 justify-content-end">
+                        {% if espacio %}
+                        <a href="{% url 'espacios:detalle_espacio' espacio.pk %}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                        {% elif horario %}
+                        <a href="{% url 'espacios:detalle_espacio' horario.espacio.pk %}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                        {% else %}
+                        <a href="{% url 'espacios:lista_horarios' %}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>{{ accion }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

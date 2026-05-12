@@ -131,6 +131,17 @@ def dashboard_view(request):
         ).count()
         context['ultimos_usuarios'] = CustomUser.objects.order_by('-date_joined')[:5]
 
+        # Estadísticas de espacios (Integrante 2)
+        try:
+            from espacios.models import Espacio
+            context['total_espacios'] = Espacio.objects.count()
+            context['espacios_disponibles'] = Espacio.objects.filter(
+                estado=Espacio.ESTADO_DISPONIBLE
+            ).count()
+        except Exception:
+            context['total_espacios'] = None
+            context['espacios_disponibles'] = None
+
     return render(request, 'accounts/dashboard.html', context)
 
 
