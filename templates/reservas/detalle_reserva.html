@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Reserva #{{ reserva.pk }} — Sistema de Reservas{% endblock %}
+
+{% block nav_extra %}
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'reservas:lista_reservas' %}">
+        <i class="bi bi-calendar-check me-1"></i>Reservas
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'reservas:lista_reservas' %}">Reservas</a>
+        </li>
+        <li class="breadcrumb-item active">Reserva #{{ reserva.pk }}</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <!-- Detalle principal -->
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-calendar-event text-primary me-2"></i>
+                    Reserva #{{ reserva.pk }}
+                </h5>
+                {% if reserva.estado == 'pendiente' %}
+                    <span class="badge bg-warning text-dark fs-6">
+                        <i class="bi bi-clock me-1"></i>Pendiente
+                    </span>
+                {% elif reserva.estado == 'aprobada' %}
+                    <span class="badge bg-success fs-6">
+                        <i class="bi bi-check-circle me-1"></i>Aprobada
+                    </span>
+                {% else %}
+                    <span class="badge bg-danger fs-6">
+                        <i class="bi bi-x-circle me-1"></i>Cancelada
+                    </span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label class="text-muted small fw-semibold text-uppercase">Espacio</label>
+                        <p class="mb-0 fw-semibold">{{ reserva.espacio.nombre }}</p>
+                        <small class="text-muted">
+                            {{ reserva.espacio.get_tipo_display }} —
+                            {{ reserva.espacio.ubicacion }}
+                        </small>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="text-muted small fw-semibold text-uppercase">Usuario</label>
+                        <p class="mb-0 fw-semibold">{{ reserva.usuario.get_nombre_completo }}</p>
+                        <small class="text-muted">{{ reserva.usuario.email }}</small>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="text-muted small fw-semibold text-uppercase">Fecha</label>
+                        <p class="mb-0 fw-semibold">{{ reserva.fecha }}</p>
+                        <small class="text-muted">
+                            {{ reserva.horario.get_dia_semana_display }}
+                        </small>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="text-muted small fw-semibold text-uppercase">Horario</label>
+                        <p class="mb-0 fw-semibold">
+                            {{ reserva.horario.hora_inicio|time:"H:i" }} –
+                            {{ reserva.horario.hora_fin|time:"H:i" }}
+                        </p>
+                        <small class="text-muted">
+                            {{ reserva.horario.duracion_minutos }} minutos
+                        </small>
+                    </div>
+                    {% if reserva.motivo %}
+                    <div class="col-12">
+                        <label class="text-muted small fw-semibold text-uppercase">Motivo</label>
+                        <p class="mb-0">{{ reserva.motivo }}</p>
+                    </div>
+                    {% endif %}
+                    {% if reserva.observaciones_admin %}
+                    <div class="col-12">
+                        <label class="text-muted small fw-semibold text-uppercase">
+                            <i class="bi bi-shield-check me-1 text-primary"></i>
+                            Observaciones del administrador
+                        </label>
+                        <div class="alert alert-info mb-0 py-2">
+                            {{ reserva.observaciones_admin }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top">
+                <small class="text-muted">
+                    Creada: {{ reserva.fecha_creacion }} &nbsp;|&nbsp;
+                    Actualizada: {{ reserva.fecha_actualizacion }}
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de acciones -->
+    <div class="col-12 col-lg-4">
+        <!-- Acciones del usuario -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-gear me-2"></i>Acciones</h6>
+            </div>
+            <div class="card-body d-grid gap-2">
+                {% if reserva.puede_cancelarse and reserva.usuario == user %}
+                <a href="{% url 'reservas:cancelar_reserva' reserva.pk %}"
+                   class="btn btn-outline-danger">
+                    <i class="bi bi-x-circle me-1"></i>Cancelar mi reserva
+                </a>
+                {% endif %}
+
+                {% if user.es_administrador and reserva.esta_pendiente %}
+                <a href="{% url 'reservas:editar_reserva' reserva.pk %}"
+                   class="btn btn-outline-secondary">
+                    <i class="bi bi-pencil me-1"></i>Editar
+                </a>
+                {% endif %}
+
+                {% if not user.es_administrador and reserva.esta_pendiente and reserva.usuario == user %}
+                <a href="{% url 'reservas:editar_reserva' reserva.pk %}"
+                   class="btn btn-outline-secondary">
+                    <i class="bi bi-pencil me-1"></i>Editar reserva
+                </a>
+                {% endif %}
+
+                <a href="{% url 'reservas:lista_reservas' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-1"></i>Volver a la lista
+                </a>
+            </div>
+        </div>
+
+        <!-- Panel de aprobación (solo admin) -->
+        {% if user.es_administrador %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="bi bi-shield-check text-primary me-2"></i>
+                    Gestión de Estado
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if reserva.esta_pendiente %}
+                <form method="post" action="{% url 'reservas:cambiar_estado' reserva.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Observaciones (opcional)</label>
+                        {% render_field form_estado.observaciones %}
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" name="accion" value="aprobar"
+                                class="btn btn-success">
+                            <i class="bi bi-check-circle me-1"></i>Aprobar reserva
+                        </button>
+                        <button type="submit" name="accion" value="cancelar"
+                                class="btn btn-danger"
+                                onclick="return confirm('¿Cancelar esta reserva?')">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar reserva
+                        </button>
+                    </div>
+                </form>
+                {% elif reserva.esta_aprobada %}
+                <form method="post" action="{% url 'reservas:cambiar_estado' reserva.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Motivo de cancelación</label>
+                        {% render_field form_estado.observaciones %}
+                    </div>
+                    <button type="submit" name="accion" value="cancelar"
+                            class="btn btn-danger w-100"
+                            onclick="return confirm('¿Cancelar esta reserva aprobada?')">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar reserva
+                    </button>
+                </form>
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-check-all fs-3 d-block mb-2 opacity-50"></i>
+                    <small>Esta reserva ya está cancelada.</small>
+                </div>
+                {% endif %}
+
+                {% if user.es_administrador %}
+                <hr>
+                <form method="post" action="{% url 'reservas:eliminar_reserva' reserva.pk %}"
+                      onsubmit="return confirm('¿Eliminar permanentemente esta reserva? Esta acción no se puede deshacer.')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                        <i class="bi bi-trash me-1"></i>Eliminar permanentemente
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
