@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     # Apps del proyecto
     'accounts',
     'espacios',
+    'reservas',
 ]
 
 MIDDLEWARE = [
