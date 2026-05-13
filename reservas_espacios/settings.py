@@ -9,13 +9,24 @@ import os
 # Ruta base del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Clave secreta (en producción usar variable de entorno)
-SECRET_KEY = 'django-insecure-gu2pb)1_#6969vumax1^6h6r*6rx%d@+3)kjr#%ba2s%0o2=um'
+# Clave secreta — en producción definir DJANGO_SECRET_KEY / SECRET_KEY en el entorno
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    os.environ.get(
+        'SECRET_KEY',
+        'django-insecure-gu2pb)1_#6969vumax1^6h6r*6rx%d@+3)kjr#%ba2s%0o2=um',
+    ),
+)
 
-# Modo debug (desactivar en producción)
-DEBUG = True
+# Modo debug (desactivar en producción: DEBUG=False)
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = ['*']
+_hosts = os.environ.get('ALLOWED_HOSTS', '*').strip()
+ALLOWED_HOSTS = [h.strip() for h in _hosts.split(',') if h.strip()] or ['*']
+
+_csrf_origins = os.environ.get('CSRF_TRUSTED_ORIGINS', '').strip()
+if _csrf_origins:
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(',') if o.strip()]
 
 # Aplicaciones instaladas
 INSTALLED_APPS = [
@@ -31,10 +42,12 @@ INSTALLED_APPS = [
     'accounts',
     'espacios',
     'reservas',
+    'reporting',  # Integrante 4 — dashboard y reportes
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -64,25 +77,35 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'reservas_espacios.wsgi.application'
 
-# Base de datos - SQLite para desarrollo, PostgreSQL para producción
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# Base de datos: SQLite en local; PostgreSQL con DATABASE_URL (Render/Railway) o variables DB_*
+DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+if DATABASE_URL:
+    import dj_database_url
 
-# Configuración de PostgreSQL (descomentar para producción)
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.environ.get('DB_NAME', 'reservas_db'),
-#         'USER': os.environ.get('DB_USER', 'postgres'),
-#         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-#         'HOST': os.environ.get('DB_HOST', 'localhost'),
-#         'PORT': os.environ.get('DB_PORT', '5432'),
-#     }
-# }
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+        )
+    }
+elif os.environ.get('DB_NAME'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'reservas_db'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Validadores de contraseña
 AUTH_PASSWORD_VALIDATORS = [
@@ -102,6 +125,16 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise para servir estáticos en producción (Render / Railway)
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
 
 # Archivos de medios (imágenes de perfil, etc.)
 MEDIA_URL = '/media/'

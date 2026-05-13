@@ -61,6 +61,12 @@
 
                     {% if user.es_administrador %}
                     <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.namespace == 'reporting' %}active{% endif %}"
+                           href="{% url 'reporting:dashboard' %}">
+                            <i class="bi bi-graph-up me-1"></i>Análisis
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'lista_usuarios' %}active{% endif %}"
                            href="{% url 'accounts:lista_usuarios' %}">
                             <i class="bi bi-people me-1"></i>Usuarios
@@ -139,7 +145,7 @@
     <!-- Footer -->
     <footer class="footer mt-auto py-3 bg-white border-top">
         <div class="container text-center text-muted small">
-            <span>Sistema de Reservas de Espacios &copy; 2025 &mdash; Proyecto Final Electiva</span>
+            <span>Sistema de Reservas de Espacios &copy; {% now "Y" %} &mdash; Proyecto Final Electiva</span>
         </div>
     </footer>
 
