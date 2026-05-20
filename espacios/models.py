@@ -1,6 +1,10 @@
 """
 Modelos del módulo de Gestión de Espacios y Horarios.
 Integrante 2 - Sistema de Reservas de Espacios
+
+Modelos:
+    - Espacio: representa un espacio físico reservable (aula, laboratorio, sala, etc.)
+    - Horario: define un bloque de tiempo disponible asociado a un espacio
 """
 
 from django.db import models
@@ -9,8 +13,14 @@ from django.utils import timezone
 
 
 class Espacio(models.Model):
-    """Representa un espacio físico reservable (aula, laboratorio, sala, etc.)."""
+    """
+    Representa un espacio físico reservable dentro de la institución.
 
+    Tipos soportados: aula, laboratorio, sala de reuniones, auditorio, otro.
+    Estados posibles: disponible, en mantenimiento, inactivo.
+    """
+
+    # ── Constantes de tipo ────────────────────────────────────────────────────
     TIPO_AULA = 'aula'
     TIPO_LABORATORIO = 'laboratorio'
     TIPO_SALA = 'sala'
@@ -25,6 +35,7 @@ class Espacio(models.Model):
         (TIPO_OTRO, 'Otro'),
     ]
 
+    # ── Constantes de estado ──────────────────────────────────────────────────
     ESTADO_DISPONIBLE = 'disponible'
     ESTADO_MANTENIMIENTO = 'mantenimiento'
     ESTADO_INACTIVO = 'inactivo'
@@ -35,6 +46,7 @@ class Espacio(models.Model):
         (ESTADO_INACTIVO, 'Inactivo'),
     ]
 
+    # ── Campos ────────────────────────────────────────────────────────────────
     nombre = models.CharField(max_length=100, unique=True, verbose_name='Nombre')
     tipo = models.CharField(max_length=20, choices=TIPOS, default=TIPO_AULA, verbose_name='Tipo')
     capacidad = models.PositiveIntegerField(verbose_name='Capacidad (personas)')
@@ -61,9 +73,11 @@ class Espacio(models.Model):
 
     @property
     def esta_disponible(self):
+        """Retorna True si el espacio está en estado disponible."""
         return self.estado == self.ESTADO_DISPONIBLE
 
     def get_horarios_activos(self):
+        """Retorna los horarios activos asociados a este espacio."""
         return self.horarios.filter(activo=True)
 
 
