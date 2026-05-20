@@ -1,6 +1,11 @@
 """
 Formularios validados para Espacios y Horarios.
 Integrante 2 - Sistema de Reservas de Espacios
+
+Formularios:
+    - EspacioForm: creación y edición de espacios, con validación de nombre único.
+    - HorarioForm: creación y edición de horarios, con validación de horas.
+    - FiltroEspacioForm: filtros de búsqueda en la lista de espacios.
 """
 
 from django import forms
@@ -8,6 +13,10 @@ from .models import Espacio, Horario
 
 
 class EspacioForm(forms.ModelForm):
+    """
+    Formulario para crear y editar un Espacio.
+    Valida unicidad de nombre (case-insensitive) y capacidad mínima de 1.
+    """
     class Meta:
         model = Espacio
         fields = ['nombre', 'tipo', 'capacidad', 'ubicacion', 'estado', 'descripcion', 'equipamiento']
@@ -52,6 +61,12 @@ class EspacioForm(forms.ModelForm):
 
 
 class HorarioForm(forms.ModelForm):
+    """
+    Formulario para crear y editar un Horario.
+    Si se pasa un espacio fijo (desde la vista de detalle), el campo
+    espacio se bloquea para evitar cambios accidentales.
+    Valida que hora_fin sea posterior a hora_inicio.
+    """
     class Meta:
         model = Horario
         fields = ['espacio', 'dia_semana', 'hora_inicio', 'hora_fin', 'activo']
@@ -89,7 +104,10 @@ class HorarioForm(forms.ModelForm):
 
 
 class FiltroEspacioForm(forms.Form):
-    """Formulario de filtros para la lista de espacios."""
+    """
+    Formulario de filtros para la lista de espacios.
+    Permite buscar por nombre/ubicación, tipo y estado.
+    """
     buscar = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
