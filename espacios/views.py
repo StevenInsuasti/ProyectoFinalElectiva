@@ -157,7 +157,11 @@ def eliminar_espacio(request, pk):
 
 @login_required
 def lista_horarios(request):
-    """Lista todos los horarios con filtro por espacio."""
+    """
+    Lista todos los horarios con filtro opcional por espacio.
+    Accesible para todos los usuarios autenticados.
+    Usa select_related para optimizar las consultas a la BD.
+    """
     espacio_id = request.GET.get('espacio')
     horarios = Horario.objects.select_related('espacio').order_by(
         'espacio__nombre', 'dia_semana', 'hora_inicio'
@@ -178,7 +182,11 @@ def lista_horarios(request):
 @login_required
 @administrador_requerido
 def crear_horario(request, espacio_pk=None):
-    """Crear un horario, opcionalmente asociado a un espacio."""
+    """
+    Crea un horario, opcionalmente asociado a un espacio específico.
+    Solo accesible para administradores.
+    Si se pasa espacio_pk, el campo espacio queda fijo en el formulario.
+    """
     espacio = get_object_or_404(Espacio, pk=espacio_pk) if espacio_pk else None
 
     if request.method == 'POST':
@@ -210,7 +218,10 @@ def crear_horario(request, espacio_pk=None):
 @login_required
 @administrador_requerido
 def editar_horario(request, pk):
-    """Editar un horario existente."""
+    """
+    Edita un horario existente. Solo accesible para administradores.
+    Redirige al detalle del espacio asociado al guardar exitosamente.
+    """
     horario = get_object_or_404(Horario, pk=pk)
     if request.method == 'POST':
         form = HorarioForm(request.POST, instance=horario)
@@ -238,7 +249,10 @@ def editar_horario(request, pk):
 @login_required
 @administrador_requerido
 def eliminar_horario(request, pk):
-    """Eliminar un horario (requiere confirmación POST)."""
+    """
+    Elimina un horario. Solo accesible para administradores.
+    Requiere confirmación mediante POST para evitar eliminaciones accidentales.
+    """
     horario = get_object_or_404(Horario, pk=pk)
     espacio_pk = horario.espacio.pk
     if request.method == 'POST':
