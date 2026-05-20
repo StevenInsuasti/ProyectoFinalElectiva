@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{# Template: lista de horarios con filtro por espacio — Integrante 2 #}
+
+{% block title %}Horarios — ReservaEspacios{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0"><i class="bi bi-clock me-2 text-primary"></i>Horarios</h2>
+    {% if user.es_administrador %}
+    <a href="{% url 'espacios:crear_horario' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Nuevo Horario
+    </a>
+    {% endif %}
+</div>
+
+<!-- Filtro por espacio -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-12 col-md-6">
+                <label class="form-label small fw-semibold">Filtrar por espacio</label>
+                <select name="espacio" class="form-select">
+                    <option value="">Todos los espacios</option>
+                    {% for e in espacios %}
+                    <option value="{{ e.pk }}" {% if espacio_seleccionado == e.pk|stringformat:"s" %}selected{% endif %}>
+                        {{ e.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-filter me-1"></i>Filtrar
+                </button>
+                <a href="{% url 'espacios:lista_horarios' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Espacio</th>
+                        <th>Día</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Duración</th>
+                        <th>Estado</th>
+                        {% if user.es_administrador %}
+                        <th class="pe-3 text-end">Acciones</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for horario in horarios %}
+                    <tr>
+                        <td class="ps-3">
+                            <a href="{% url 'espacios:detalle_espacio' horario.espacio.pk %}"
+                               class="text-decoration-none fw-semibold">
+                                {{ horario.espacio.nombre }}
+                            </a>
+                        </td>
+                        <td>{{ horario.get_dia_semana_display }}</td>
+                        <td>{{ horario.hora_inicio|time:"H:i" }}</td>
+                        <td>{{ horario.hora_fin|time:"H:i" }}</td>
+                        <td class="text-muted small">{{ horario.duracion_minutos }} min</td>
+                        <td>
+                            {% if horario.activo %}
+                                <span class="badge bg-success-subtle text-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        {% if user.es_administrador %}
+                        <td class="pe-3 text-end">
+                            <a href="{% url 'espacios:editar_horario' horario.pk %}"
+                               class="btn btn-sm btn-outline-secondary me-1">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalEliminar"
+                                    data-url="{% url 'espacios:eliminar_horario' horario.pk %}"
+                                    data-nombre="{{ horario }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+                            No hay horarios registrados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if user.es_administrador %}
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Eliminar Horario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                ¿Eliminar el horario <strong id="nombreHorario"></strong>?
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formEliminar" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const modal = document.getElementById('modalEliminar');
+    if (modal) {
+        modal.addEventListener('show.bs.modal', function (e) {
+            const btn = e.relatedTarget;
+            document.getElementById('nombreHorario').textContent = btn.dataset.nombre;
+            document.getElementById('formEliminar').action = btn.dataset.url;
+        });
+    }
+</script>
+{% endblock %}

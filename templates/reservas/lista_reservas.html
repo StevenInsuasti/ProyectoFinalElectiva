@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Reservas — Sistema de Reservas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0 fw-bold">
+            <i class="bi bi-calendar-check text-primary me-2"></i>
+            {% if user.es_administrador %}Gestión de Reservas{% else %}Mis Reservas{% endif %}
+        </h2>
+        <p class="text-muted mb-0 small">
+            {% if user.es_administrador %}
+                Administra todas las reservas del sistema
+            {% else %}
+                Consulta y gestiona tus reservas
+            {% endif %}
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        {% if not user.es_administrador %}
+        <a href="{% url 'reservas:historial_reservas' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-clock-history me-1"></i>Mi Historial
+        </a>
+        {% else %}
+        <a href="{% url 'reservas:panel_admin' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-speedometer2 me-1"></i>Panel Admin
+        </a>
+        {% endif %}
+        <a href="{% url 'reservas:crear_reserva' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Nueva Reserva
+        </a>
+    </div>
+</div>
+
+<!-- Estadísticas rápidas -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body py-3">
+                <div class="fs-3 fw-bold text-primary">{{ stats.total }}</div>
+                <div class="text-muted small">Total</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body py-3">
+                <div class="fs-3 fw-bold text-warning">{{ stats.pendientes }}</div>
+                <div class="text-muted small">Pendientes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body py-3">
+                <div class="fs-3 fw-bold text-success">{{ stats.aprobadas }}</div>
+                <div class="text-muted small">Aprobadas</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body py-3">
+                <div class="fs-3 fw-bold text-danger">{{ stats.canceladas }}</div>
+                <div class="text-muted small">Canceladas</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-12 col-md-3">
+                <label class="form-label small fw-semibold">Estado</label>
+                {% render_field form_filtro.estado %}
+            </div>
+            <div class="col-12 col-md-2">
+                <label class="form-label small fw-semibold">Desde</label>
+                {% render_field form_filtro.fecha_desde %}
+            </div>
+            <div class="col-12 col-md-2">
+                <label class="form-label small fw-semibold">Hasta</label>
+                {% render_field form_filtro.fecha_hasta %}
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="form-label small fw-semibold">Espacio</label>
+                {% render_field form_filtro.espacio %}
+            </div>
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm flex-fill">
+                    <i class="bi bi-funnel me-1"></i>Filtrar
+                </button>
+                <a href="{% url 'reservas:lista_reservas' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de reservas -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        {% if reservas %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">#</th>
+                        {% if user.es_administrador %}<th>Usuario</th>{% endif %}
+                        <th>Espacio</th>
+                        <th>Fecha</th>
+                        <th>Horario</th>
+                        <th>Estado</th>
+                        <th class="text-end pe-3">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reserva in reservas %}
+                    <tr>
+                        <td class="ps-3 text-muted small">{{ reserva.pk }}</td>
+                        {% if user.es_administrador %}
+                        <td>
+                            <span class="fw-semibold">{{ reserva.usuario.get_nombre_completo }}</span>
+                            <br><small class="text-muted">{{ reserva.usuario.username }}</small>
+                        </td>
+                        {% endif %}
+                        <td>
+                            <span class="fw-semibold">{{ reserva.espacio.nombre }}</span>
+                            <br><small class="text-muted">{{ reserva.espacio.get_tipo_display }}</small>
+                        </td>
+                        <td>
+                            {{ reserva.fecha }}
+                            {% if not reserva.es_futura %}
+                            <br><span class="badge bg-secondary small">Pasada</span>
+                            {% endif %}
+                        </td>
+                        <td class="small">
+                            {{ reserva.horario.hora_inicio|time:"H:i" }} –
+                            {{ reserva.horario.hora_fin|time:"H:i" }}
+                        </td>
+                        <td>
+                            {% if reserva.estado == 'pendiente' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-clock me-1"></i>Pendiente
+                                </span>
+                            {% elif reserva.estado == 'aprobada' %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Aprobada
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-x-circle me-1"></i>Cancelada
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'reservas:detalle_reserva' reserva.pk %}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if reserva.puede_cancelarse %}
+                            <a href="{% url 'reservas:cancelar_reserva' reserva.pk %}"
+                               class="btn btn-sm btn-outline-danger ms-1">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-calendar-x fs-1 d-block mb-3 opacity-50"></i>
+            <p class="mb-2">No hay reservas que mostrar.</p>
+            <a href="{% url 'reservas:crear_reserva' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>Crear primera reserva
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

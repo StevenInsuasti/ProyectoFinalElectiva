@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ titulo }} — Sistema de Reservas{% endblock %}
+
+{% block extra_css %}
+<style>
+    .field-error { border-color: #dc3545 !important; }
+    .help-text { font-size: 0.8rem; color: #6c757d; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'reservas:lista_reservas' %}">Reservas</a>
+        </li>
+        {% if reserva %}
+        <li class="breadcrumb-item">
+            <a href="{% url 'reservas:detalle_reserva' reserva.pk %}">Reserva #{{ reserva.pk }}</a>
+        </li>
+        {% endif %}
+        <li class="breadcrumb-item active">{{ titulo }}</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-calendar-plus text-primary me-2"></i>{{ titulo }}
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" novalidate id="reservaForm">
+                    {% csrf_token %}
+
+                    <!-- Errores generales -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Espacio -->
+                    <div class="mb-3">
+                        <label for="{{ form.espacio.id_for_label }}" class="form-label fw-semibold">
+                            <i class="bi bi-building me-1 text-primary"></i>
+                            Espacio <span class="text-danger">*</span>
+                        </label>
+                        {% if form.espacio.errors %}
+                            {% render_field form.espacio class="form-select field-error" %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.espacio.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% else %}
+                            {% render_field form.espacio class="form-select" %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Horario -->
+                    <div class="mb-3">
+                        <label for="{{ form.horario.id_for_label }}" class="form-label fw-semibold">
+                            <i class="bi bi-clock me-1 text-primary"></i>
+                            Horario <span class="text-danger">*</span>
+                        </label>
+                        {% if form.horario.errors %}
+                            {% render_field form.horario class="form-select field-error" %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.horario.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% else %}
+                            {% render_field form.horario class="form-select" %}
+                        {% endif %}
+                        <div class="help-text mt-1">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Selecciona primero el espacio para ver sus horarios disponibles.
+                        </div>
+                    </div>
+
+                    <!-- Fecha -->
+                    <div class="mb-3">
+                        <label for="{{ form.fecha.id_for_label }}" class="form-label fw-semibold">
+                            <i class="bi bi-calendar3 me-1 text-primary"></i>
+                            Fecha de reserva <span class="text-danger">*</span>
+                        </label>
+                        {% if form.fecha.errors %}
+                            {% render_field form.fecha class="form-control field-error" %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.fecha.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% else %}
+                            {% render_field form.fecha class="form-control" %}
+                        {% endif %}
+                        <div class="help-text mt-1" id="diaHint">
+                            <i class="bi bi-info-circle me-1"></i>
+                            La fecha debe corresponder al día de la semana del horario seleccionado.
+                        </div>
+                    </div>
+
+                    <!-- Motivo -->
+                    <div class="mb-3">
+                        <label for="{{ form.motivo.id_for_label }}" class="form-label fw-semibold">
+                            <i class="bi bi-chat-text me-1 text-primary"></i>
+                            Motivo
+                        </label>
+                        {% if form.motivo.errors %}
+                            {% render_field form.motivo class="form-control field-error" %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.motivo.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% else %}
+                            {% render_field form.motivo class="form-control" %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Campos extra para admin -->
+                    {% if user.es_administrador and form.estado %}
+                    <hr>
+                    <h6 class="fw-bold text-muted mb-3">
+                        <i class="bi bi-shield-check me-1"></i>Opciones de administrador
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">Estado</label>
+                            {% render_field form.estado class="form-select" %}
+                        </div>
+                        <div class="col-sm-6 d-flex align-items-end">
+                            <div class="form-check mb-2">
+                                {% render_field form.confirmacion_automatica class="form-check-input" %}
+                                <label class="form-check-label" for="{{ form.confirmacion_automatica.id_for_label }}">
+                                    Confirmación automática
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Observaciones del administrador</label>
+                            {% render_field form.observaciones_admin class="form-control" %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Botones -->
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>{{ accion }}
+                        </button>
+                        {% if reserva %}
+                        <a href="{% url 'reservas:detalle_reserva' reserva.pk %}"
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-x me-1"></i>Cancelar
+                        </a>
+                        {% else %}
+                        <a href="{% url 'reservas:lista_reservas' %}"
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-x me-1"></i>Cancelar
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/**
+ * Carga dinámica de horarios al cambiar el espacio seleccionado.
+ * Actualiza el select de horarios vía API JSON.
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    const espacioSelect = document.getElementById('id_espacio');
+    const horarioSelect = document.getElementById('id_horario');
+    const fechaInput = document.querySelector('input[name="fecha"]');
+    const diaHint = document.getElementById('diaHint');
+
+    const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+    function cargarHorarios(espacioId, fechaVal) {
+        if (!espacioId) {
+            horarioSelect.innerHTML = '<option value="">— Selecciona un horario —</option>';
+            return;
+        }
+
+        let url = `/reservas/api/horarios/${espacioId}/`;
+        if (fechaVal) url += `?fecha=${fechaVal}`;
+
+        horarioSelect.innerHTML = '<option value="">Cargando...</option>';
+        horarioSelect.disabled = true;
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            horarioSelect.innerHTML = '<option value="">— Selecciona un horario —</option>';
+            if (data.horarios.length === 0) {
+                horarioSelect.innerHTML += '<option value="" disabled>Sin horarios disponibles</option>';
+            } else {
+                data.horarios.forEach(h => {
+                    const opt = document.createElement('option');
+                    opt.value = h.id;
+                    const disponible = h.disponible !== false;
+                    opt.textContent = `${h.dia} ${h.hora_inicio}–${h.hora_fin}${disponible ? '' : ' (ocupado)'}`;
+                    opt.disabled = !disponible;
+                    horarioSelect.appendChild(opt);
+                });
+            }
+            horarioSelect.disabled = false;
+        })
+        .catch(() => {
+            horarioSelect.innerHTML = '<option value="">Error al cargar horarios</option>';
+            horarioSelect.disabled = false;
+        });
+    }
+
+    function actualizarHint() {
+        const horarioOpt = horarioSelect.options[horarioSelect.selectedIndex];
+        if (horarioOpt && horarioOpt.value) {
+            const texto = horarioOpt.textContent;
+            const dia = DIAS.find(d => texto.startsWith(d));
+            if (dia && diaHint) {
+                diaHint.innerHTML = `<i class="bi bi-info-circle me-1"></i>
+                    Este horario aplica los <strong>${dia}s</strong>. Elige una fecha que sea ${dia}.`;
+            }
+        }
+    }
+
+    if (espacioSelect) {
+        espacioSelect.addEventListener('change', function () {
+            cargarHorarios(this.value, fechaInput ? fechaInput.value : '');
+        });
+    }
+
+    if (horarioSelect) {
+        horarioSelect.addEventListener('change', actualizarHint);
+    }
+
+    if (fechaInput && espacioSelect && espacioSelect.value) {
+        fechaInput.addEventListener('change', function () {
+            cargarHorarios(espacioSelect.value, this.value);
+        });
+    }
+});
+</script>
+{% endblock %}

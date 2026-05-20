@@ -1,0 +1,102 @@
+/* =====================================================
+   Sistema de Reservas de Espacios - Estilos globales
+   Integrante 1 - Módulo de Autenticación
+   ===================================================== */
+
+/* ── Variables de color ─────────────────────────────── */
+:root {
+    --color-primary: #0d6efd;
+    --color-sidebar-bg: #1a1d23;
+    --color-card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Layout general ─────────────────────────────────── */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* ── Navbar ─────────────────────────────────────────── */
+.navbar-brand {
+    font-size: 1.1rem;
+    letter-spacing: 0.3px;
+}
+
+/* ── Cards ──────────────────────────────────────────── */
+.card {
+    border-radius: 12px;
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: var(--color-card-shadow);
+}
+
+/* ── Formularios ────────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+/* ── Botones ────────────────────────────────────────── */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-lg {
+    padding: 0.6rem 1.5rem;
+}
+
+/* ── Badges ─────────────────────────────────────────── */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* ── Tablas ─────────────────────────────────────────── */
+.table th {
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.04);
+}
+
+/* ── Alertas ────────────────────────────────────────── */
+.alert {
+    border-radius: 10px;
+    border: none;
+}
+
+/* ── Footer ─────────────────────────────────────────── */
+.footer {
+    margin-top: auto;
+}
+
+/* ── Animaciones suaves ─────────────────────────────── */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive: ocultar columnas en móvil ──────────── */
+@media (max-width: 576px) {
+    .table .d-none-mobile {
+        display: none !important;
+    }
+}

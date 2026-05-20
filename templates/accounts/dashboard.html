@@ -1,0 +1,345 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - ReservaEspacios{% endblock %}
+
+{% block content %}
+<!-- Encabezado de bienvenida -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard
+        </h2>
+        <p class="text-muted mb-0">
+            Bienvenido, <strong>{{ usuario.get_nombre_completo }}</strong> &mdash;
+            <span class="badge bg-{% if usuario.es_administrador %}warning text-dark{% else %}primary{% endif %}">
+                {{ usuario.get_rol_display }}
+            </span>
+        </p>
+    </div>
+    <div class="text-muted small">
+        <i class="bi bi-calendar3 me-1"></i>
+        <span id="fechaActual"></span>
+    </div>
+</div>
+
+<!-- ── PANEL ADMINISTRADOR ─────────────────────────────── -->
+{% if usuario.es_administrador %}
+<div class="row g-4 mb-4">
+
+    <!-- Tarjeta: Total usuarios -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+                    <i class="bi bi-people-fill text-primary fs-3"></i>
+                </div>
+                <div>
+                    <p class="text-muted small mb-0">Total Usuarios</p>
+                    <h3 class="fw-bold mb-0">{{ total_usuarios }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta: Usuarios activos -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-success bg-opacity-10 rounded-3 p-3">
+                    <i class="bi bi-person-check-fill text-success fs-3"></i>
+                </div>
+                <div>
+                    <p class="text-muted small mb-0">Usuarios Activos</p>
+                    <h3 class="fw-bold mb-0">{{ usuarios_activos }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta: Administradores -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-warning bg-opacity-10 rounded-3 p-3">
+                    <i class="bi bi-shield-fill-check text-warning fs-3"></i>
+                </div>
+                <div>
+                    <p class="text-muted small mb-0">Administradores</p>
+                    <h3 class="fw-bold mb-0">{{ total_admins }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta: Espacios (Integrante 2) -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-info bg-opacity-10 rounded-3 p-3">
+                    <i class="bi bi-door-open-fill text-info fs-3"></i>
+                </div>
+                <div>
+                    <p class="text-muted small mb-0">Espacios</p>
+                    {% if total_espacios is not None %}
+                        <h3 class="fw-bold mb-0">{{ total_espacios }}</h3>
+                        <small class="text-success">{{ espacios_disponibles }} disponibles</small>
+                    {% else %}
+                        <h3 class="fw-bold mb-0 text-muted">—</h3>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fila extra: Reservas (Integrante 3) -->
+<div class="row g-4 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+                    <i class="bi bi-calendar-check-fill text-primary fs-3"></i>
+                </div>
+                <div>
+                    <p class="text-muted small mb-0">Total Reservas</p>
+                    {% if total_reservas is not None %}
+                        <h3 class="fw-bold mb-0">{{ total_reservas }}</h3>
+                    {% else %}
+                        <h3 class="fw-bold mb-0 text-muted">—</h3>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-warning bg-opacity-10 rounded-3 p-3">
+                    <i class="bi bi-clock-fill text-warning fs-3"></i>
+                </div>
+                <div>
+                    <p class="text-muted small mb-0">Reservas Pendientes</p>
+                    {% if reservas_pendientes is not None %}
+                        <h3 class="fw-bold mb-0">{{ reservas_pendientes }}</h3>
+                        {% if reservas_pendientes > 0 %}
+                        <a href="{% url 'reservas:panel_admin' %}" class="small text-warning">
+                            Ver pendientes →
+                        </a>
+                        {% endif %}
+                    {% else %}
+                        <h3 class="fw-bold mb-0 text-muted">—</h3>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-success bg-opacity-10 rounded-3 p-3">
+                    <i class="bi bi-calendar-plus-fill text-success fs-3"></i>
+                </div>
+                <div>
+                    <p class="text-muted small mb-0">Gestión de Reservas</p>
+                    <a href="{% url 'reservas:lista_reservas' %}" class="btn btn-sm btn-outline-success mt-1">
+                        Ver todas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de últimos usuarios registrados -->
+<div class="row g-4">
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3 pb-0">
+                <h5 class="fw-semibold mb-0">
+                    <i class="bi bi-clock-history me-2 text-primary"></i>Últimos Usuarios Registrados
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Usuario</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th class="pe-3">Registro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in ultimos_usuarios %}
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="bg-secondary bg-opacity-10 rounded-circle d-flex
+                                                    align-items-center justify-content-center"
+                                             style="width:36px; height:36px;">
+                                            <i class="bi bi-person text-secondary"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold small">{{ u.get_nombre_completo }}</div>
+                                            <div class="text-muted" style="font-size:.75rem;">{{ u.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if u.es_administrador %}warning text-dark{% else %}primary{% endif %}">
+                                        {{ u.get_rol_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if u.is_active %}
+                                        <span class="badge bg-success-subtle text-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger-subtle text-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td class="pe-3 text-muted small">
+                                    {{ u.date_joined|date:"d/m/Y" }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    No hay usuarios registrados aún.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-0 text-end">
+                <a href="{% url 'accounts:lista_usuarios' %}" class="btn btn-sm btn-outline-primary">
+                    Ver todos los usuarios <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de acciones rápidas -->
+    <div class="col-12 col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pt-3 pb-0">
+                <h5 class="fw-semibold mb-0">
+                    <i class="bi bi-lightning-charge me-2 text-warning"></i>Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'accounts:lista_usuarios' %}" class="btn btn-outline-primary text-start">
+                        <i class="bi bi-people me-2"></i>Gestionar Usuarios
+                    </a>
+                    <a href="{% url 'reservas:panel_admin' %}" class="btn btn-outline-warning text-start">
+                        <i class="bi bi-calendar-check me-2"></i>Panel de Reservas
+                    </a>
+                    <a href="{% url 'accounts:perfil' %}" class="btn btn-outline-secondary text-start">
+                        <i class="bi bi-person-gear me-2"></i>Editar Mi Perfil
+                    </a>
+                    <a href="/admin/" class="btn btn-outline-dark text-start" target="_blank">
+                        <i class="bi bi-gear me-2"></i>Panel de Administración Django
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- ── PANEL USUARIO ESTÁNDAR ──────────────────────────── -->
+<div class="row g-4">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm text-center p-4">
+            <div class="mb-3">
+                {% if usuario.foto_perfil %}
+                    <img src="{{ usuario.foto_perfil.url }}" alt="Foto de perfil"
+                         class="rounded-circle" width="80" height="80" style="object-fit:cover;">
+                {% else %}
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex
+                                align-items-center justify-content-center"
+                         style="width:80px; height:80px;">
+                        <i class="bi bi-person-fill text-primary fs-1"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <h5 class="fw-bold">{{ usuario.get_nombre_completo }}</h5>
+            <p class="text-muted small mb-1">{{ usuario.email }}</p>
+            {% if usuario.telefono %}
+                <p class="text-muted small mb-2">
+                    <i class="bi bi-telephone me-1"></i>{{ usuario.telefono }}
+                </p>
+            {% endif %}
+            <span class="badge bg-primary">{{ usuario.get_rol_display }}</span>
+            <div class="mt-3">
+                <a href="{% url 'accounts:perfil' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-pencil me-1"></i>Editar Perfil
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones disponibles para el usuario -->
+    <div class="col-12 col-md-6 col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pt-3 pb-0">
+                <h5 class="fw-semibold mb-0">
+                    <i class="bi bi-grid me-2 text-primary"></i>Módulos Disponibles
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- Módulo de reservas (Integrante 3) -->
+                    <div class="col-6">
+                        <a href="{% url 'reservas:lista_reservas' %}" class="text-decoration-none">
+                            <div class="card border text-center p-3 h-100">
+                                <i class="bi bi-calendar-check fs-2 text-primary mb-2"></i>
+                                <p class="small fw-semibold mb-0 text-dark">Mis Reservas</p>
+                            </div>
+                        </a>
+                    </div>
+                    <!-- Módulo de espacios (Integrante 2) -->
+                    <div class="col-6">
+                        <a href="{% url 'espacios:lista_espacios' %}" class="text-decoration-none">
+                            <div class="card border text-center p-3 h-100">
+                                <i class="bi bi-door-open fs-2 text-success mb-2"></i>
+                                <p class="small fw-semibold mb-0 text-dark">Espacios</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'accounts:perfil' %}" class="text-decoration-none">
+                            <div class="card border text-center p-3 h-100 hover-shadow">
+                                <i class="bi bi-person-gear fs-2 text-warning mb-2"></i>
+                                <p class="small fw-semibold mb-0 text-dark">Mi Perfil</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'accounts:cambiar_password' %}" class="text-decoration-none">
+                            <div class="card border text-center p-3 h-100">
+                                <i class="bi bi-key fs-2 text-danger mb-2"></i>
+                                <p class="small fw-semibold mb-0 text-dark">Contraseña</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Mostrar fecha actual
+    const fecha = new Date();
+    const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('fechaActual').textContent =
+        fecha.toLocaleDateString('es-CO', opciones);
+</script>
+{% endblock %}

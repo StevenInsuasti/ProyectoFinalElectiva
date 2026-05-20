@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Análisis y reportes — ReservaEspacios{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="row align-items-end g-3 mb-4">
+    <div class="col-12 col-lg">
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-graph-up-arrow me-2 text-primary"></i>Dashboard analítico
+        </h2>
+        <p class="text-muted mb-0">
+            Indicadores en tiempo real, exportaciones y calendario interactivo.
+            Rango seleccionado: <strong>{{ fecha_desde }}</strong> — <strong>{{ fecha_hasta }}</strong>
+        </p>
+    </div>
+    <div class="col-12 col-lg-auto">
+        <form class="row g-2 align-items-end" method="get" action="{% url 'reporting:dashboard' %}">
+            <div class="col-6 col-md-auto">
+                <label class="form-label small text-muted mb-0">Desde</label>
+                <input type="date" name="fecha_desde" class="form-control" value="{{ fecha_desde|date:'Y-m-d' }}">
+            </div>
+            <div class="col-6 col-md-auto">
+                <label class="form-label small text-muted mb-0">Hasta</label>
+                <input type="date" name="fecha_hasta" class="form-control" value="{{ fecha_hasta|date:'Y-m-d' }}">
+            </div>
+            <div class="col-12 col-md-auto d-grid d-md-block">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel me-1"></i>Aplicar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Reservas (rango)</p>
+                <h3 class="fw-bold mb-0">{{ kpis.total }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Aprobadas</p>
+                <h3 class="fw-bold text-success mb-0">{{ kpis.aprobadas }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Pendientes</p>
+                <h3 class="fw-bold text-warning mb-0">{{ kpis.pendientes }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Canceladas</p>
+                <h3 class="fw-bold text-danger mb-0">{{ kpis.canceladas }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Usuarios activos (cuenta)</p>
+                <h3 class="fw-bold mb-0">{{ usuarios.cuentas_activas }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Con reserva en rango</p>
+                <h3 class="fw-bold text-primary mb-0">{{ usuarios.usuarios_distintos_con_reserva }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Registros nuevos en rango</p>
+                <h4 class="fw-semibold mb-0">{{ usuarios.registros_nuevos_en_rango }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                <div>
+                    <h6 class="fw-semibold mb-1"><i class="bi bi-download me-2"></i>Reportes exportables</h6>
+                    <p class="text-muted small mb-0">Respetan el mismo rango de fechas del filtro superior.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-outline-danger"
+                       href="{% url 'reporting:export_pdf' %}?fecha_desde={{ fecha_desde|date:'Y-m-d' }}&fecha_hasta={{ fecha_hasta|date:'Y-m-d' }}">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                    </a>
+                    <a class="btn btn-outline-success"
+                       href="{% url 'reporting:export_excel' %}?fecha_desde={{ fecha_desde|date:'Y-m-d' }}&fecha_hasta={{ fecha_hasta|date:'Y-m-d' }}">
+                        <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-xl-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pt-3">
+                <h5 class="fw-semibold mb-0">Ocupación semanal (semana de «hasta»)</h5>
+                <small class="text-muted">Reservas no canceladas por día — Chart.js</small>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;">
+                    <canvas id="chartSemanal"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pt-3">
+                <h5 class="fw-semibold mb-0">Reservas por mes</h5>
+                <small class="text-muted">En el rango filtrado — Chart.js</small>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;">
+                    <canvas id="chartMensual"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3">
+                <h5 class="fw-semibold mb-0">Reservas por sala</h5>
+                <small class="text-muted">Plotly (barras horizontales)</small>
+            </div>
+            <div class="card-body">
+                <div id="plotSalas" class="w-100" style="min-height: 320px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-0 pt-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <h5 class="fw-semibold mb-0">Calendario interactivo</h5>
+            <small class="text-muted">FullCalendar — todas las reservas en el rango filtrado</small>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="calendar"></div>
+    </div>
+</div>
+
+{{ semana|json_script:"reporting-data-semana" }}
+{{ por_mes|json_script:"reporting-data-mes" }}
+{{ por_sala|json_script:"reporting-data-salas" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales-all.global.min.js"></script>
+<script>
+  window.REPORTING_CALENDAR_EVENTS_URL = "{% url 'reporting:calendar_events' %}";
+</script>
+<script src="{% static 'js/reporting_dashboard.js' %}"></script>
+{% endblock %}
