@@ -3,6 +3,7 @@ from .models import Espacio, Horario
 
 
 class HorarioInline(admin.TabularInline):
+    """Muestra los horarios de un espacio directamente en su panel de admin."""
     model = Horario
     extra = 1
     fields = ['dia_semana', 'hora_inicio', 'hora_fin', 'activo']
@@ -10,6 +11,7 @@ class HorarioInline(admin.TabularInline):
 
 @admin.register(Espacio)
 class EspacioAdmin(admin.ModelAdmin):
+    """Panel de administración para el modelo Espacio."""
     list_display = ['nombre', 'tipo', 'capacidad', 'ubicacion', 'estado', 'fecha_creacion']
     list_filter = ['tipo', 'estado']
     search_fields = ['nombre', 'ubicacion']
@@ -19,6 +21,7 @@ class EspacioAdmin(admin.ModelAdmin):
 
 @admin.register(Horario)
 class HorarioAdmin(admin.ModelAdmin):
+    """Panel de administración para el modelo Horario."""
     list_display = ['espacio', 'dia_semana', 'hora_inicio', 'hora_fin', 'activo']
     list_filter = ['dia_semana', 'activo', 'espacio']
     search_fields = ['espacio__nombre']
