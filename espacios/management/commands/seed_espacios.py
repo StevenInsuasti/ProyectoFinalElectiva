@@ -81,6 +81,7 @@ ESPACIOS_DATA = [
 ]
 
 # Horarios: (dia_semana, hora_inicio, hora_fin)
+# Lunes a Viernes (0-4), franjas de 2 horas
 HORARIOS_BASE = [
     (0, '07:00', '09:00'),
     (0, '09:00', '11:00'),
@@ -89,15 +90,24 @@ HORARIOS_BASE = [
     (0, '16:00', '18:00'),
     (1, '07:00', '09:00'),
     (1, '09:00', '11:00'),
+    (1, '11:00', '13:00'),
     (1, '14:00', '16:00'),
+    (1, '16:00', '18:00'),
     (2, '07:00', '09:00'),
+    (2, '09:00', '11:00'),
     (2, '11:00', '13:00'),
+    (2, '14:00', '16:00'),
     (2, '16:00', '18:00'),
+    (3, '07:00', '09:00'),
     (3, '09:00', '11:00'),
+    (3, '11:00', '13:00'),
     (3, '14:00', '16:00'),
+    (3, '16:00', '18:00'),
     (4, '07:00', '09:00'),
     (4, '09:00', '11:00'),
+    (4, '11:00', '13:00'),
     (4, '14:00', '16:00'),
+    (4, '16:00', '18:00'),
 ]
 
 
@@ -119,7 +129,7 @@ class Command(BaseCommand):
 
                 # Solo agregar horarios a espacios disponibles
                 if espacio.estado == 'disponible':
-                    for dia, inicio, fin in HORARIOS_BASE[:8]:  # 8 horarios por espacio
+                    for dia, inicio, fin in HORARIOS_BASE:  # todos los horarios L-V
                         try:
                             from datetime import time
                             h_inicio = time(*[int(x) for x in inicio.split(':')])
