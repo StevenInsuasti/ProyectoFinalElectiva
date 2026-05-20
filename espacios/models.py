@@ -83,8 +83,14 @@ class Espacio(models.Model):
 
 class Horario(models.Model):
     """
-    Define un bloque de tiempo disponible para un espacio.
-    Preparado para integrarse con el módulo de Reservas (Integrante 3).
+    Define un bloque de tiempo disponible para un espacio específico.
+
+    Cada horario pertenece a un Espacio (FK) y representa una franja horaria
+    en un día de la semana. Se valida que no existan solapamientos entre
+    horarios del mismo espacio y día.
+
+    Preparado para integrarse con el módulo de Reservas (Integrante 3):
+    el modelo Reserva referenciará un Horario para concretar una reserva.
     """
 
     DIAS_SEMANA = [
@@ -123,7 +129,11 @@ class Horario(models.Model):
         )
 
     def clean(self):
-        """Validar que hora_fin sea posterior a hora_inicio."""
+        """
+        Validaciones del modelo Horario:
+        1. hora_fin debe ser posterior a hora_inicio.
+        2. No debe solaparse con horarios existentes del mismo espacio y día.
+        """
         if self.hora_inicio and self.hora_fin:
             if self.hora_fin <= self.hora_inicio:
                 raise ValidationError(
