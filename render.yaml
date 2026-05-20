@@ -4,7 +4,7 @@ services:
     name: reservas-espacios-web
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py crear_superusuario && python manage.py seed_espacios
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py crear_superusuario && python manage.py seed_espacios && python manage.py seed_horarios
     startCommand: gunicorn reservas_espacios.wsgi:application
     envVars:
       - key: PYTHON_VERSION
