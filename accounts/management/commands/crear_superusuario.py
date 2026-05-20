@@ -25,7 +25,13 @@ class Command(BaseCommand):
         password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'Admin1234!')
 
         if CustomUser.objects.filter(username=username).exists():
-            self.stdout.write(f'El superusuario "{username}" ya existe, omitiendo.')
+            # Si ya existe, actualizar la contraseña con la del entorno
+            user = CustomUser.objects.get(username=username)
+            user.set_password(password)
+            user.save()
+            self.stdout.write(
+                self.style.SUCCESS(f'Contraseña del superusuario "{username}" actualizada.')
+            )
             return
 
         CustomUser.objects.create_superuser(
