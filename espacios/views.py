@@ -273,7 +273,10 @@ def eliminar_horario(request, pk):
 def api_horarios_espacio(request, espacio_pk):
     """
     Endpoint JSON: devuelve los horarios activos de un espacio.
-    Preparado para que el módulo de Reservas (Integrante 3) lo consuma.
+    Preparado para que el módulo de Reservas (Integrante 3) lo consuma
+    al cargar dinámicamente los horarios disponibles en el formulario de reserva.
+
+    Response: { espacio: str, horarios: [{id, dia, hora_inicio, hora_fin}] }
     """
     espacio = get_object_or_404(Espacio, pk=espacio_pk)
     horarios = espacio.horarios.filter(activo=True).values(
@@ -294,8 +297,11 @@ def api_horarios_espacio(request, espacio_pk):
 @login_required
 def api_espacios_disponibles(request):
     """
-    Endpoint JSON: devuelve espacios disponibles.
-    Preparado para el módulo de Reservas (Integrante 3).
+    Endpoint JSON: devuelve todos los espacios en estado disponible.
+    Preparado para el módulo de Reservas (Integrante 3) para poblar
+    el selector de espacios en el formulario de reserva.
+
+    Response: { espacios: [{id, nombre, tipo, capacidad, ubicacion}] }
     """
     espacios = Espacio.objects.filter(estado=Espacio.ESTADO_DISPONIBLE).values(
         'id', 'nombre', 'tipo', 'capacidad', 'ubicacion'
