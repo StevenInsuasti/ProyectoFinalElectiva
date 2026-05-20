@@ -1,6 +1,13 @@
 """
 Comando para cargar datos de prueba de Espacios y Horarios.
-Uso: python manage.py seed_espacios
+Integrante 2 - Sistema de Reservas de Espacios
+
+Uso:
+    python manage.py seed_espacios
+
+Crea 7 espacios de prueba (aulas, laboratorios, sala, auditorio)
+con sus respectivos horarios semanales. Usa get_or_create para
+evitar duplicados si se ejecuta más de una vez.
 """
 
 from django.core.management.base import BaseCommand
