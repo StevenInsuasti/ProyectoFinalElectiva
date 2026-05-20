@@ -21,6 +21,9 @@ urlpatterns = [
     # Módulo de Reservas (Integrante 3)
     path('reservas/', include('reservas.urls', namespace='reservas')),
 
+    # Dashboard analítico, exportaciones y calendario (Integrante 4)
+    path('reporting/', include('reporting.urls', namespace='reporting')),
+
     # Redirección raíz al login
     path('', lambda request: redirect('accounts:login'), name='home'),
 ]
