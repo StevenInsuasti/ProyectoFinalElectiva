@@ -1,6 +1,23 @@
 """
 Vistas del módulo de Gestión de Espacios y Horarios.
 Integrante 2 - Sistema de Reservas de Espacios
+
+Vistas de Espacios:
+    - lista_espacios: listado con filtros de búsqueda (nombre, tipo, estado)
+    - detalle_espacio: detalle con horarios asociados
+    - crear_espacio: formulario de creación (solo administrador)
+    - editar_espacio: formulario de edición (solo administrador)
+    - eliminar_espacio: confirmación y eliminación (solo administrador)
+
+Vistas de Horarios:
+    - lista_horarios: listado con filtro por espacio
+    - crear_horario: formulario de creación (solo administrador)
+    - editar_horario: formulario de edición (solo administrador)
+    - eliminar_horario: confirmación y eliminación (solo administrador)
+
+API JSON (para integración con módulo de Reservas):
+    - api_horarios_espacio: horarios activos de un espacio
+    - api_espacios_disponibles: espacios en estado disponible
 """
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -18,7 +35,11 @@ from .forms import EspacioForm, HorarioForm, FiltroEspacioForm
 
 @login_required
 def lista_espacios(request):
-    """Lista todos los espacios con filtros de búsqueda."""
+    """
+    Lista todos los espacios con filtros de búsqueda.
+    Accesible para todos los usuarios autenticados.
+    Anota cada espacio con el total de horarios asociados.
+    """
     form_filtro = FiltroEspacioForm(request.GET)
     espacios = Espacio.objects.annotate(total_horarios=Count('horarios'))
 
@@ -46,7 +67,10 @@ def lista_espacios(request):
 
 @login_required
 def detalle_espacio(request, pk):
-    """Detalle de un espacio con sus horarios."""
+    """
+    Muestra el detalle de un espacio con todos sus horarios.
+    Accesible para todos los usuarios autenticados.
+    """
     espacio = get_object_or_404(Espacio, pk=pk)
     horarios = espacio.horarios.all().order_by('dia_semana', 'hora_inicio')
     context = {
@@ -59,7 +83,10 @@ def detalle_espacio(request, pk):
 @login_required
 @administrador_requerido
 def crear_espacio(request):
-    """Crear un nuevo espacio (solo administrador)."""
+    """
+    Crea un nuevo espacio. Solo accesible para administradores.
+    Redirige al detalle del espacio creado al guardar exitosamente.
+    """
     if request.method == 'POST':
         form = EspacioForm(request.POST)
         if form.is_valid():
@@ -81,7 +108,10 @@ def crear_espacio(request):
 @login_required
 @administrador_requerido
 def editar_espacio(request, pk):
-    """Editar un espacio existente (solo administrador)."""
+    """
+    Edita un espacio existente. Solo accesible para administradores.
+    Redirige al detalle del espacio al guardar exitosamente.
+    """
     espacio = get_object_or_404(Espacio, pk=pk)
     if request.method == 'POST':
         form = EspacioForm(request.POST, instance=espacio)
@@ -105,7 +135,10 @@ def editar_espacio(request, pk):
 @login_required
 @administrador_requerido
 def eliminar_espacio(request, pk):
-    """Eliminar un espacio (solo administrador, requiere confirmación POST)."""
+    """
+    Elimina un espacio. Solo accesible para administradores.
+    Requiere confirmación mediante POST para evitar eliminaciones accidentales.
+    """
     espacio = get_object_or_404(Espacio, pk=pk)
     if request.method == 'POST':
         nombre = espacio.nombre
