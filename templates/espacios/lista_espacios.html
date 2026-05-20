@@ -2,15 +2,6 @@
 
 {% block title %}Espacios — ReservaEspacios{% endblock %}
 
-{% block nav_extra %}
-<li class="nav-item">
-    <a class="nav-link {% if request.resolver_match.app_name == 'espacios' %}active{% endif %}"
-       href="{% url 'espacios:lista_espacios' %}">
-        <i class="bi bi-door-open me-1"></i>Espacios
-    </a>
-</li>
-{% endblock %}
-
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>

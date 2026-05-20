@@ -3,15 +3,6 @@
 
 {% block title %}Reservas — Sistema de Reservas{% endblock %}
 
-{% block nav_extra %}
-<li class="nav-item">
-    <a class="nav-link {% if request.resolver_match.namespace == 'reservas' %}active{% endif %}"
-       href="{% url 'reservas:lista_reservas' %}">
-        <i class="bi bi-calendar-check me-1"></i>Reservas
-    </a>
-</li>
-{% endblock %}
-
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
