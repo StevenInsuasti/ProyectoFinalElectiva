@@ -1,6 +1,23 @@
 """
 Vistas del módulo de Gestión de Espacios y Horarios.
 Integrante 2 - Sistema de Reservas de Espacios
+
+Vistas de Espacios:
+    - lista_espacios: listado con filtros de búsqueda (nombre, tipo, estado)
+    - detalle_espacio: detalle con horarios asociados
+    - crear_espacio: formulario de creación (solo administrador)
+    - editar_espacio: formulario de edición (solo administrador)
+    - eliminar_espacio: confirmación y eliminación (solo administrador)
+
+Vistas de Horarios:
+    - lista_horarios: listado con filtro por espacio
+    - crear_horario: formulario de creación (solo administrador)
+    - editar_horario: formulario de edición (solo administrador)
+    - eliminar_horario: confirmación y eliminación (solo administrador)
+
+API JSON (para integración con módulo de Reservas):
+    - api_horarios_espacio: horarios activos de un espacio
+    - api_espacios_disponibles: espacios en estado disponible
 """
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -18,7 +35,11 @@ from .forms import EspacioForm, HorarioForm, FiltroEspacioForm
 
 @login_required
 def lista_espacios(request):
-    """Lista todos los espacios con filtros de búsqueda."""
+    """
+    Lista todos los espacios con filtros de búsqueda.
+    Accesible para todos los usuarios autenticados.
+    Anota cada espacio con el total de horarios asociados.
+    """
     form_filtro = FiltroEspacioForm(request.GET)
     espacios = Espacio.objects.annotate(total_horarios=Count('horarios'))
 
@@ -46,7 +67,10 @@ def lista_espacios(request):
 
 @login_required
 def detalle_espacio(request, pk):
-    """Detalle de un espacio con sus horarios."""
+    """
+    Muestra el detalle de un espacio con todos sus horarios.
+    Accesible para todos los usuarios autenticados.
+    """
     espacio = get_object_or_404(Espacio, pk=pk)
     horarios = espacio.horarios.all().order_by('dia_semana', 'hora_inicio')
     context = {
@@ -59,7 +83,10 @@ def detalle_espacio(request, pk):
 @login_required
 @administrador_requerido
 def crear_espacio(request):
-    """Crear un nuevo espacio (solo administrador)."""
+    """
+    Crea un nuevo espacio. Solo accesible para administradores.
+    Redirige al detalle del espacio creado al guardar exitosamente.
+    """
     if request.method == 'POST':
         form = EspacioForm(request.POST)
         if form.is_valid():
@@ -81,7 +108,10 @@ def crear_espacio(request):
 @login_required
 @administrador_requerido
 def editar_espacio(request, pk):
-    """Editar un espacio existente (solo administrador)."""
+    """
+    Edita un espacio existente. Solo accesible para administradores.
+    Redirige al detalle del espacio al guardar exitosamente.
+    """
     espacio = get_object_or_404(Espacio, pk=pk)
     if request.method == 'POST':
         form = EspacioForm(request.POST, instance=espacio)
@@ -105,7 +135,10 @@ def editar_espacio(request, pk):
 @login_required
 @administrador_requerido
 def eliminar_espacio(request, pk):
-    """Eliminar un espacio (solo administrador, requiere confirmación POST)."""
+    """
+    Elimina un espacio. Solo accesible para administradores.
+    Requiere confirmación mediante POST para evitar eliminaciones accidentales.
+    """
     espacio = get_object_or_404(Espacio, pk=pk)
     if request.method == 'POST':
         nombre = espacio.nombre
@@ -124,7 +157,11 @@ def eliminar_espacio(request, pk):
 
 @login_required
 def lista_horarios(request):
-    """Lista todos los horarios con filtro por espacio."""
+    """
+    Lista todos los horarios con filtro opcional por espacio.
+    Accesible para todos los usuarios autenticados.
+    Usa select_related para optimizar las consultas a la BD.
+    """
     espacio_id = request.GET.get('espacio')
     horarios = Horario.objects.select_related('espacio').order_by(
         'espacio__nombre', 'dia_semana', 'hora_inicio'
@@ -145,7 +182,11 @@ def lista_horarios(request):
 @login_required
 @administrador_requerido
 def crear_horario(request, espacio_pk=None):
-    """Crear un horario, opcionalmente asociado a un espacio."""
+    """
+    Crea un horario, opcionalmente asociado a un espacio específico.
+    Solo accesible para administradores.
+    Si se pasa espacio_pk, el campo espacio queda fijo en el formulario.
+    """
     espacio = get_object_or_404(Espacio, pk=espacio_pk) if espacio_pk else None
 
     if request.method == 'POST':
@@ -177,7 +218,10 @@ def crear_horario(request, espacio_pk=None):
 @login_required
 @administrador_requerido
 def editar_horario(request, pk):
-    """Editar un horario existente."""
+    """
+    Edita un horario existente. Solo accesible para administradores.
+    Redirige al detalle del espacio asociado al guardar exitosamente.
+    """
     horario = get_object_or_404(Horario, pk=pk)
     if request.method == 'POST':
         form = HorarioForm(request.POST, instance=horario)
@@ -205,7 +249,10 @@ def editar_horario(request, pk):
 @login_required
 @administrador_requerido
 def eliminar_horario(request, pk):
-    """Eliminar un horario (requiere confirmación POST)."""
+    """
+    Elimina un horario. Solo accesible para administradores.
+    Requiere confirmación mediante POST para evitar eliminaciones accidentales.
+    """
     horario = get_object_or_404(Horario, pk=pk)
     espacio_pk = horario.espacio.pk
     if request.method == 'POST':
@@ -226,7 +273,10 @@ def eliminar_horario(request, pk):
 def api_horarios_espacio(request, espacio_pk):
     """
     Endpoint JSON: devuelve los horarios activos de un espacio.
-    Preparado para que el módulo de Reservas (Integrante 3) lo consuma.
+    Preparado para que el módulo de Reservas (Integrante 3) lo consuma
+    al cargar dinámicamente los horarios disponibles en el formulario de reserva.
+
+    Response: { espacio: str, horarios: [{id, dia, hora_inicio, hora_fin}] }
     """
     espacio = get_object_or_404(Espacio, pk=espacio_pk)
     horarios = espacio.horarios.filter(activo=True).values(
@@ -247,8 +297,11 @@ def api_horarios_espacio(request, espacio_pk):
 @login_required
 def api_espacios_disponibles(request):
     """
-    Endpoint JSON: devuelve espacios disponibles.
-    Preparado para el módulo de Reservas (Integrante 3).
+    Endpoint JSON: devuelve todos los espacios en estado disponible.
+    Preparado para el módulo de Reservas (Integrante 3) para poblar
+    el selector de espacios en el formulario de reserva.
+
+    Response: { espacios: [{id, nombre, tipo, capacidad, ubicacion}] }
     """
     espacios = Espacio.objects.filter(estado=Espacio.ESTADO_DISPONIBLE).values(
         'id', 'nombre', 'tipo', 'capacidad', 'ubicacion'

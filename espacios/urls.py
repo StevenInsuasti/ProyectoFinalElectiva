@@ -1,6 +1,24 @@
 """
 URLs del módulo de Gestión de Espacios y Horarios.
 Integrante 2 - Sistema de Reservas de Espacios
+
+Rutas de Espacios:
+    /espacios/                      -> lista_espacios
+    /espacios/nuevo/                -> crear_espacio (admin)
+    /espacios/<pk>/                 -> detalle_espacio
+    /espacios/<pk>/editar/          -> editar_espacio (admin)
+    /espacios/<pk>/eliminar/        -> eliminar_espacio (admin)
+
+Rutas de Horarios:
+    /espacios/horarios/             -> lista_horarios
+    /espacios/horarios/nuevo/       -> crear_horario (admin)
+    /espacios/<pk>/horarios/nuevo/  -> crear_horario_espacio (admin)
+    /espacios/horarios/<pk>/editar/ -> editar_horario (admin)
+    /espacios/horarios/<pk>/eliminar/ -> eliminar_horario (admin)
+
+Rutas API JSON:
+    /espacios/api/<pk>/horarios/    -> api_horarios_espacio
+    /espacios/api/disponibles/      -> api_espacios_disponibles
 """
 
 from django.urls import path
