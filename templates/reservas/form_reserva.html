@@ -64,26 +64,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- Horario -->
-                    <div class="mb-3">
-                        <label for="{{ form.horario.id_for_label }}" class="form-label fw-semibold">
-                            <i class="bi bi-clock me-1 text-primary"></i>
-                            Horario <span class="text-danger">*</span>
-                        </label>
-                        {% if form.horario.errors %}
-                            {% render_field form.horario class="form-select field-error" %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.horario.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% else %}
-                            {% render_field form.horario class="form-select" %}
-                        {% endif %}
-                        <div class="help-text mt-1">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Selecciona primero el espacio para ver sus horarios disponibles.
-                        </div>
-                    </div>
-
                     <!-- Fecha -->
                     <div class="mb-3">
                         <label for="{{ form.fecha.id_for_label }}" class="form-label fw-semibold">
@@ -100,7 +80,27 @@
                         {% endif %}
                         <div class="help-text mt-1" id="diaHint">
                             <i class="bi bi-info-circle me-1"></i>
-                            La fecha debe corresponder al día de la semana del horario seleccionado.
+                            Selecciona primero el espacio y la fecha para ver los horarios disponibles.
+                        </div>
+                    </div>
+
+                    <!-- Horario -->
+                    <div class="mb-3">
+                        <label for="{{ form.horario.id_for_label }}" class="form-label fw-semibold">
+                            <i class="bi bi-clock me-1 text-primary"></i>
+                            Horario <span class="text-danger">*</span>
+                        </label>
+                        {% if form.horario.errors %}
+                            {% render_field form.horario class="form-select field-error" %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.horario.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% else %}
+                            {% render_field form.horario class="form-select" %}
+                        {% endif %}
+                        <div class="help-text mt-1">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Los horarios se cargan automáticamente según el espacio y la fecha elegidos.
                         </div>
                     </div>
 
