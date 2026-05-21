@@ -32,12 +32,16 @@ from reservas.models import Reserva
 
 
 def _default_range() -> tuple[date, date]:
-    """Rango por defecto: mes en curso completo (del día 1 al último día del mes)."""
-    import calendar
+    """Rango por defecto: desde el primer día del mes actual hasta 3 meses adelante."""
     today = timezone.localdate()
     start = today.replace(day=1)
-    last_day = calendar.monthrange(today.year, today.month)[1]
-    end = today.replace(day=last_day)
+    # Calcular 3 meses adelante
+    month = today.month + 3
+    year = today.year + (month - 1) // 12
+    month = ((month - 1) % 12) + 1
+    import calendar
+    last_day = calendar.monthrange(year, month)[1]
+    end = date(year, month, last_day)
     return start, end
 
 
