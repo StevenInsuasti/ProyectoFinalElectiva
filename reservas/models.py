@@ -86,8 +86,7 @@ class Reserva(models.Model):
         verbose_name = 'Reserva'
         verbose_name_plural = 'Reservas'
         ordering = ['-fecha', '-fecha_creacion']
-        # Evitar doble reserva exacta: mismo espacio + horario + fecha
-        unique_together = [('espacio', 'horario', 'fecha')]
+        # La unicidad se controla en clean() para excluir reservas canceladas
 
     def __str__(self):
         return (
