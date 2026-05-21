@@ -60,6 +60,13 @@ class Espacio(models.Model):
         verbose_name='Equipamiento',
         help_text='Ej: proyector, aire acondicionado, pizarrón'
     )
+    # Si está activo, las reservas de este espacio se aprueban automáticamente
+    confirmacion_automatica = models.BooleanField(
+        default=True,
+        verbose_name='Confirmación automática de reservas',
+        help_text='Si está activo, las reservas de este espacio se aprueban automáticamente. '
+                  'Desactívalo si requieren aprobación manual del administrador.'
+    )
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
     fecha_actualizacion = models.DateTimeField(auto_now=True, verbose_name='Última actualización')
 

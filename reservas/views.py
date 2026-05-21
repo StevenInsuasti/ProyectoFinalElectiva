@@ -114,8 +114,9 @@ def crear_reserva(request):
             try:
                 reserva = form.save(commit=False)
                 reserva.usuario = request.user
-                # Confirmación automática si el espacio lo permite
-                # (puede configurarse por espacio en el futuro)
+                # Confirmación automática según la configuración del espacio
+                if reserva.espacio.confirmacion_automatica:
+                    reserva.confirmacion_automatica = True
                 reserva.save()
                 if reserva.esta_aprobada:
                     messages.success(

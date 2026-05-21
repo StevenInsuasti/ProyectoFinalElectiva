@@ -63,6 +63,22 @@
                             <label class="form-label fw-semibold">Equipamiento</label>
                             {% render_field form.equipamiento %}
                         </div>
+                        <!-- Confirmación automática de reservas -->
+                        <div class="col-12">
+                            <div class="card bg-light border-0 p-3">
+                                <div class="form-check">
+                                    {% render_field form.confirmacion_automatica %}
+                                    <label class="form-check-label fw-semibold ms-1"
+                                           for="{{ form.confirmacion_automatica.id_for_label }}">
+                                        <i class="bi bi-lightning-charge me-1 text-warning"></i>
+                                        {{ form.confirmacion_automatica.label }}
+                                    </label>
+                                </div>
+                                <div class="form-text mt-1">
+                                    {{ form.confirmacion_automatica.help_text }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <hr class="my-4">
                     <div class="d-flex gap-2 justify-content-end">

@@ -23,6 +23,7 @@ ESPACIOS_DATA = [
         'estado': 'disponible',
         'descripcion': 'Aula estándar con proyector y pizarrón.',
         'equipamiento': 'Proyector, pizarrón, 30 sillas, aire acondicionado',
+        'confirmacion_automatica': True,
     },
     {
         'nombre': 'Aula 202',
@@ -32,6 +33,7 @@ ESPACIOS_DATA = [
         'estado': 'disponible',
         'descripcion': 'Aula amplia para grupos grandes.',
         'equipamiento': 'Proyector, pizarrón, 40 sillas',
+        'confirmacion_automatica': True,
     },
     {
         'nombre': 'Laboratorio de Sistemas',
@@ -41,6 +43,7 @@ ESPACIOS_DATA = [
         'estado': 'disponible',
         'descripcion': 'Laboratorio con 25 computadores.',
         'equipamiento': '25 PCs, proyector, aire acondicionado',
+        'confirmacion_automatica': True,
     },
     {
         'nombre': 'Laboratorio de Redes',
@@ -50,6 +53,7 @@ ESPACIOS_DATA = [
         'estado': 'disponible',
         'descripcion': 'Laboratorio especializado en redes.',
         'equipamiento': '20 PCs, equipos de red, proyector',
+        'confirmacion_automatica': True,
     },
     {
         'nombre': 'Sala de Reuniones A',
@@ -59,6 +63,7 @@ ESPACIOS_DATA = [
         'estado': 'disponible',
         'descripcion': 'Sala para reuniones pequeñas.',
         'equipamiento': 'TV 55", mesa redonda, 10 sillas',
+        'confirmacion_automatica': True,
     },
     {
         'nombre': 'Auditorio Principal',
@@ -68,6 +73,7 @@ ESPACIOS_DATA = [
         'estado': 'disponible',
         'descripcion': 'Auditorio para eventos institucionales.',
         'equipamiento': 'Sistema de sonido, proyector, 200 sillas, escenario',
+        'confirmacion_automatica': False,  # Requiere aprobación manual
     },
     {
         'nombre': 'Sala de Cómputo',
@@ -77,6 +83,7 @@ ESPACIOS_DATA = [
         'estado': 'mantenimiento',
         'descripcion': 'En mantenimiento por actualización de equipos.',
         'equipamiento': '15 PCs',
+        'confirmacion_automatica': True,
     },
 ]
 

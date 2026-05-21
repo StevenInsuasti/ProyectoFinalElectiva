@@ -19,7 +19,8 @@ class EspacioForm(forms.ModelForm):
     """
     class Meta:
         model = Espacio
-        fields = ['nombre', 'tipo', 'capacidad', 'ubicacion', 'estado', 'descripcion', 'equipamiento']
+        fields = ['nombre', 'tipo', 'capacidad', 'ubicacion', 'estado',
+                  'descripcion', 'equipamiento', 'confirmacion_automatica']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control', 'placeholder': 'Ej: Aula 101'
@@ -39,6 +40,18 @@ class EspacioForm(forms.ModelForm):
                 'class': 'form-control', 'rows': 2,
                 'placeholder': 'Ej: Proyector, aire acondicionado, 30 sillas'
             }),
+            'confirmacion_automatica': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+            }),
+        }
+        labels = {
+            'confirmacion_automatica': 'Aprobar reservas automáticamente',
+        }
+        help_texts = {
+            'confirmacion_automatica': (
+                'Si está marcado, las reservas de este espacio se aprueban al instante. '
+                'Desmarca si requieren aprobación manual del administrador.'
+            ),
         }
 
     def clean_nombre(self):
