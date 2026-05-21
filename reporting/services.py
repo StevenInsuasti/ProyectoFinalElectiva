@@ -32,9 +32,13 @@ from reservas.models import Reserva
 
 
 def _default_range() -> tuple[date, date]:
+    """Rango por defecto: mes en curso completo (del día 1 al último día del mes)."""
+    import calendar
     today = timezone.localdate()
     start = today.replace(day=1)
-    return start, today
+    last_day = calendar.monthrange(today.year, today.month)[1]
+    end = today.replace(day=last_day)
+    return start, end
 
 
 def parse_date_range(
